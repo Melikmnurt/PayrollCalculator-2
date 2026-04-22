@@ -1,61 +1,69 @@
 package com.pluralsight;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.InputStream;
+import java.io.BufferedReader;   //Reads the employee file
+import java.io.BufferedWriter;   // writes the payroll file
+import java.io.FileReader;      // opens the input file
+import java.io.FileWriter;      //creates the output file
 import java.io.IOException;
+import java.util.Scanner;       //lets the user type file names
 
 public class PayrollCalculator {
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
 
         try {
-            //Step 1: Load the CSV file from resources folder
+            //Step 1: Ask user for input file name
+            System.out.print("Enter the name of the employee file to process: ");
+            String inputFile = scanner.nextLine();
 
-            InputStream is = PayrollCalculator.class.getResourceAsStream("/employees.csv");
+            //Step 2: Ask user for output file name
+            System.out.print("Enter the name of the payroll file to create: ");
+            String outputFile = scanner.nextLine();
 
-            //Check if file exists
-            if (is == null){
-                System.out.println("File not found!");
-                return;                                 //Stop program if file is missing
-            }
-            //Wrap InputStream with BufferedReader for reading text
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            //Step 3: Open the employee file for reading
+            BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/" + inputFile));
 
-            //Step 2: Skip the header line
+            //Step 4: Open the payroll file for writing
+            BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+
+            //Step 5: Skip the header line in the employe file
             reader.readLine();
 
-            String line;                             //Variable to store each line from file
+            //Step 6:Write the header line to the payroll file
+            writer.write("id | name | gross pay\n ");
 
-            //Step 3: Read file line by line
-            while ((line = reader.readLine()) != null){
+            String line;
 
-                //Step 4: Split the line into parts
+            //Step 7: Read each line from the employee file
+            while ((line = reader.readLine()) != null) {
+
+                //Step 8: Split the line into tokens
                 String[] tokens = line.split("\\|");
 
-                //Step 5: Convert string values to proper types
+                //Step 9: Convert values to correct data types
                 int id = Integer.parseInt(tokens[0]);
-                //Convert "10" to 10
-
-                String name = tokens [1];
-                //name stays as String
-
+                String name = tokens[1];
                 double hoursWorked = Double.parseDouble(tokens[2]);
-                //Convert "52.5" to 52.5
-
                 double payRate = Double.parseDouble(tokens[3]);
-                //Convert "12.50" to 12.50
 
-                //Step 6: Create an employee object
+                //Step 10: Create Employee object
                 Employee emp = new Employee(id, name, hoursWorked, payRate);
 
-                //Step 7: Display employee information
-                System.out.printf("ID: %d  |  Name: %s  | Gross: %.2f\n",
-                        emp.getEmployeeId(),   //get ID
-                        emp.getName(),         //get name
-                        emp.getGrossPay());    //calculate gross pay
+                //Step 11: Write employee payroll info to output file
+                writer.write(String.format(" %d | %s | %.2f\n ",
+                        emp.getEmployeeId(),
+                        emp.getName(),
+                        emp.getGrossPay()));
             }
+            //Step 12: Close files
             reader.close();
-        } catch (IOException e){
+            writer.close();
+            scanner.close();
+
+            //Step 13: Success
+            System.out.println("Payroll file created successfully!");
+
+        } catch (IOException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
